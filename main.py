@@ -17,14 +17,27 @@ async def test():
         return False
     else:
         return True
-@app.get("/armAll")
-async def armAll():
-    print("---------------arm all uav:")
-    if os.system('python3 uav_all_test.py'):
+
+
+# 3.15 实机任务测试
+@app.get("/missiontest")
+async def test():
+    print("---------------missiontest:")
+    if os.system('python missiontest.py'):
         return False
     else:
         return True
 
+
+
+
+@app.get("/armAll")
+async def armAll():
+    print("---------------arm all uav:")
+    if os.system('python uav_all_test.py'):
+        return False
+    else:
+        return True
 
 class uav_info(BaseModel):
     uav: str
@@ -35,7 +48,7 @@ class uav_info(BaseModel):
 @app.get("/{uav_num}/fly/takeoff")
 async def takeoff(uav_num: str):
     uav_port = str(int(uav_num[-1]) + 14540)
-    if os.system('python3 takeoff.py ' + uav_port):
+    if os.system('python takeoff.py ' + uav_port):
         return False
     else:
         return True
@@ -128,10 +141,32 @@ async def mission(uav_num: str,missionItems: MissionItems):
             mission_items_txt.write(i + '\n')
         mission_items_txt.close()
 
-    if os.system('python3 mission2.py ' + uav_port):
+    if os.system('python mission2.py ' + uav_port):
         return False
     else:
         return True
+
+
+# 3.15 实机测试mission
+@app.post("/missiontest2")
+async def mission(uav_num: str,missionItems: MissionItems):
+    uav_port = str(int(uav_num[-1]) + 14540)
+
+    itemsss = missionItems.get_info()
+
+    # writter into mission_items.txt
+    with  open('mission_items.txt', 'w') as mission_items_txt:
+        for i in itemsss:
+            i = str(i)
+            mission_items_txt.write(i + '\n')
+        mission_items_txt.close()
+
+    print("---------------missiontest2222:")
+    if os.system('python missiontest2.py '):
+        return False
+    else:
+        return True
+
 
 
 @app.get("/{uav_num}/fly/land")
