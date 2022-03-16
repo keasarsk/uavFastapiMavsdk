@@ -1,17 +1,16 @@
-#!/usr/bin/env python3
+# 自带任务版本
 
 import asyncio
 
 from mavsdk import System
 from mavsdk.mission import (MissionItem, MissionPlan)
 
-import sys
 
 async def run():
-    print("Waiting...")
+    print("MissionTestWaiting...")
 
     drone = System()
-    # await drone.connect(system_address="udp://:"+sys.argv[1])
+    # await drone.connect(system_address="udp://:14540")
     await drone.connect(system_address="tcp://192.168.1.81:8080")
 
     print("Waiting for drone to connect...")
@@ -20,49 +19,18 @@ async def run():
             print("Drone discovered!")
             break
 
-    # task
     print_mission_progress_task = asyncio.ensure_future(
         print_mission_progress(drone))
-    print("print_mission_progress_task:")
-    print(type(print_mission_progress_task))
-    print(print_mission_progress_task)
 
-    # list[task]
     running_tasks = [print_mission_progress_task]
-    print("running_tasks:")
-    print(type(running_tasks))
-    print(running_tasks)
-
-    # task
     termination_task = asyncio.ensure_future(
         observe_is_in_air(drone, running_tasks))
-    print("termination_task:")
-    print(type(termination_task))
-    print(termination_task)
-
-
 
     mission_items = []
-    # mission_items.append(MissionItem(sys.argv[2],
-    #                                  sys.argv[3],
-    #                                  sys.argv[4],
-    #                                  sys.argv[5],
-    #                                  True,
-    #                                  float('nan'),
-    #                                  float('nan'),
-    #                                  sys.argv[6],
-    #                                  float('nan'),
-    #                                  sys.argv[7],
-    #                                  sys.argv[8],
-    #                                  float('nan'),
-    #                                  sys.argv[9]))
-
-
-    # 纬,经
-    mission_items.append(MissionItem(39.092744,
-                                     121.819351,
-                                     25,
-                                     10,
+    mission_items.append(MissionItem(39.086536650135685,
+                                     121.81313931941986,
+                                     5,
+                                     1,
                                      True,
                                      float('nan'),
                                      float('nan'),
@@ -72,10 +40,10 @@ async def run():
                                      float('nan'),
                                      float('nan'),
                                      float('nan')))
-    mission_items.append(MissionItem(39.092607,
-                                     121.81949,
-                                     25,
-                                     10,
+    mission_items.append(MissionItem(39.08638258817571,
+                                     121.81335926055908,
+                                     5,
+                                     1,
                                      True,
                                      float('nan'),
                                      float('nan'),
@@ -85,10 +53,10 @@ async def run():
                                      float('nan'),
                                      float('nan'),
                                      float('nan')))
-    mission_items.append(MissionItem(39.093034,
-                                     121.819544,
-                                     25,
-                                     10,
+    mission_items.append(MissionItem(39.08671569469342,
+                                     121.81333780288696,
+                                     5,
+                                     1,
                                      True,
                                      float('nan'),
                                      float('nan'),
@@ -98,18 +66,6 @@ async def run():
                                      float('nan'),
                                      float('nan'),
                                      float('nan')))
-    # mission_items.append(MissionItem(47.399025620791885,
-    #                                  8.550092830163271,
-    #                                  25,
-    #                                  10,
-    #                                  True,
-    #                                  float('nan'),
-    #                                  float('nan'),
-    #                                  MissionItem.CameraAction.NONE,
-    #                                  float('nan'),
-    #                                  float('nan'),
-    #                                  float('nan'),
-    #                                  float('nan')))
 
     mission_plan = MissionPlan(mission_items)
 
@@ -121,16 +77,9 @@ async def run():
     print("-- Arming")
     await drone.action.arm()
 
-    # print("-- takeoff")
-    # await drone.action.takeoff()
-
-    # await asyncio.sleep(8)
-
     print("-- Starting mission")
     await drone.mission.start_mission()
 
-    # await asyncio.sleep(10)
-    # print("termination_task:")
     await termination_task
 
 
@@ -163,7 +112,5 @@ async def observe_is_in_air(drone, running_tasks):
             return
 
 
-
 loop = asyncio.get_event_loop()
 loop.run_until_complete(run())
-# loop.close()

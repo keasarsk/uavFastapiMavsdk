@@ -108,21 +108,27 @@ class MissionItems(BaseModel):
         yaw_deg = self.yaw_deg
         return latitude_deg,longitude_deg,self.relative_altitude_m,\
                self.speed_m_s,self.camera_action,camera_photo_interval_s,yaw_deg
+
+    # 行得通的简易版:
+    # json:
+    # {
+    #     "speed_m_s": [2],
+    #     "latitude_deg": [39.086536650135685, 39.086536650135685],
+    #     "longitude_deg": [121.81313931941986, 121.81313931941986],
+    #     "relative_altitude_m": [3]
+    # }
+    # speed_m_s = []
     # latitude_deg = []
     # longitude_deg = []
     # relative_altitude_m = []
-
-    # def get_items(self):
-    #     uav_num = self.uav
+    #
+    # def get_info(self):
+    #     # uav_num = self.uav
     #     latitude_deg = self.latitude_deg
     #     longitude_deg = self.longitude_deg
     #     relative_altitude_m = self.relative_altitude_m
     #     speed_m_s = self.speed_m_s
-    #     camera_action = self.camera_action
-    #     camera_photo_interval_s = self.camera_photo_interval_s
-    #     yaw_deg = self.yaw_deg
-    #     return uav_num[-1],latitude_deg,longitude_deg,relative_altitude_m,speed_m_s,\
-    #         camera_action,camera_photo_interval_s,yaw_deg
+    #     return latitude_deg, longitude_deg, relative_altitude_m, speed_m_s
 @app.post("/{uav_num}/mission")
 async def mission(uav_num: str,missionItems: MissionItems):
     uav_port = str(int(uav_num[-1]) + 14540)
@@ -147,7 +153,7 @@ async def mission(uav_num: str,missionItems: MissionItems):
         return True
 
 
-# 3.15 实机测试mission
+# 3.15 实机测试mission 把任务写进文件
 @app.post("/missiontest2")
 async def mission(uav_num: str,missionItems: MissionItems):
     uav_port = str(int(uav_num[-1]) + 14540)

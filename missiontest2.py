@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# 被传入任务版本
 
 import asyncio
 
