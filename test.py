@@ -47,6 +47,7 @@ async def run():
 
     print("-- Arming")
     await drone.action.arm()
+    await drone.action.land()
 
     await asyncio.sleep(5)
 

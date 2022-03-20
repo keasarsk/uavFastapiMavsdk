@@ -174,6 +174,13 @@ async def mission(uav_num: str,missionItems: MissionItems):
         return True
 
 
+@app.get("/{uav_num}/pause_mission")
+async def land(uav_num: str):
+    uav_port = str(int(uav_num[-1]) + 14540)
+    if os.system('python3 pausemission.py ' + uav_port):
+        return False
+    else:
+        return True
 
 @app.get("/{uav_num}/fly/land")
 async def land(uav_num: str):

@@ -27,9 +27,9 @@ async def run():
         observe_is_in_air(drone, running_tasks))
 
     mission_items = []
-    mission_items.append(MissionItem(39.086536650135685,
-                                     121.81313931941986,
-                                     5,
+    mission_items.append(MissionItem(39.08554166955255,
+                                     121.80813517598546,
+                                     2,
                                      1,
                                      True,
                                      float('nan'),
@@ -40,9 +40,9 @@ async def run():
                                      float('nan'),
                                      float('nan'),
                                      float('nan')))
-    mission_items.append(MissionItem(39.08638258817571,
-                                     121.81335926055908,
-                                     5,
+    mission_items.append(MissionItem(39.08520097384079,
+                                     121.8083480191318,
+                                     2,
                                      1,
                                      True,
                                      float('nan'),
@@ -53,9 +53,22 @@ async def run():
                                      float('nan'),
                                      float('nan'),
                                      float('nan')))
-    mission_items.append(MissionItem(39.08671569469342,
-                                     121.81333780288696,
-                                     5,
+    mission_items.append(MissionItem(39.08554166955255,
+                                     121.80813517598546,
+                                     2,
+                                     1,
+                                     True,
+                                     float('nan'),
+                                     float('nan'),
+                                     MissionItem.CameraAction.NONE,
+                                     float('nan'),
+                                     float('nan'),
+                                     float('nan'),
+                                     float('nan'),
+                                     float('nan')))
+    mission_items.append(MissionItem(39.08520097384079,
+                                     121.8083480191318,
+                                     2,
                                      1,
                                      True,
                                      float('nan'),
@@ -81,6 +94,11 @@ async def run():
     await drone.mission.start_mission()
 
     await termination_task
+
+    # await drone.action.return_to_launch()
+
+    await drone.action.land()
+
 
 
 async def print_mission_progress(drone):
