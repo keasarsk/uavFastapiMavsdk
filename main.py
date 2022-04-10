@@ -9,7 +9,7 @@ app = FastAPI()
 
 # = None ,means default
 
-
+# 3.15 实机任务测试
 @app.get("/test")
 async def test():
     print("---------------tesst:")
