@@ -2,13 +2,14 @@
 from fastapi import FastAPI
 import os
 import sys
-
+from Location_log import Location_log
 from pydantic import BaseModel
+
 
 app = FastAPI()
 
 # 4.18 大无人机的日志
-@app.get("/{uav_num}/log")
+@app.get("/{uav_num}/logbig")
 async def logfile(uav_num: str):
     if os.system('python3 log.py '):
         return False
@@ -51,11 +52,10 @@ async def test():
 
 
 
-
 @app.get("/armAll")
 async def armAll():
     print("---------------arm all uav:")
-    if os.system('python uav_all_test.py'):
+    if os.system('python3 uav_all_test.py'):
         return False
     else:
         return True
@@ -108,8 +108,8 @@ class MissionItems(BaseModel):
     altitude: str
     camera: str
     speed_m_s = []
-    camera_photo_interval_s = []
-    yaw_deg = []
+    # camera_photo_interval_s = []
+    # yaw_deg = []
     camera_action = []
     relative_altitude_m = []
     def get_info(self):
@@ -264,9 +264,43 @@ async def followme(uav_num: str):
     else:
         return True
 
+# 4.18 师姐日至
+# 存uav的日至
+class uavInfo(BaseModel):
+    # battery = []
+    # 当前任务列表
+    # routeLine = []
+    # 当前相机状态
+    # camera: str
+    # 当前飞行速度
+    # speed_m_s = []
+    # camera_photo_interval_s = []
+    # yaw_deg = []
+    # camera_action = []
+    position = []
+    battery = []
+
+
+log = Location_log()
+location = []
+battery = []
+
+@app.get("/{uav_num}/log")
+async def location(uav_num: str):
+    uav_port = str(int(uav_num[-1]) + 14540)
+    if await log.run():
+        return log.battery , log.location
+    else:
+        return log.battery , log.location
+
+
+
+
+
 
 @app.get("/{uav_num}/location")
 async def location(uav_num: str):
+    
     uav_port = str(int(uav_num[-1]) + 14540)
     if os.system('python3 location_now.py ' + uav_port):
         return False

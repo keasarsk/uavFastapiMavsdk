@@ -4,6 +4,8 @@ import asyncio
 from mavsdk import System
 from mavsdk import telemetry
 import sys
+
+
 async def run():
 
     drone = System()
@@ -21,12 +23,22 @@ async def run():
             print("Global position estimate ok")
             break
 
-    print("arm")
+    print("arm-----------------")
     await drone.action.arm()
 
     async for terrain_info1 in drone.telemetry.gps_info():
         print(terrain_info1)
         break
+
+    print("mission---------------")
+    print(type(drone.mission.download_mission_with_progress()))
+    print(type(123))
+    # async for terrain_info3 in drone.mission.download_mission_with_progress():
+    #     print(typeof(terrain_info3))
+    #     print(terrain_info3)
+    #     break
+
+    print("battery-------------")
     async for terrain_info2 in drone.telemetry.battery():
         print(terrain_info2)
         break
