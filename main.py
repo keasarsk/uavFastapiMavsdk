@@ -8,6 +8,16 @@ from pydantic import BaseModel
 app = FastAPI()
 
 # = None ,means default
+# 4.17 链接小飞机试试
+@app.get("/little")
+async def test():
+    print("---------------little:")
+    if os.system('python little.py'):
+        return False
+    else:
+        return True
+
+
 
 # 3.15 实机任务测试
 @app.get("/test")
