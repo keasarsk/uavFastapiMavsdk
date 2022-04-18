@@ -7,8 +7,19 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
+# 4.18 大无人机的日志
+@app.get("/{uav_num}/log")
+async def logfile(uav_num: str):
+    if os.system('python3 log.py '):
+        return False
+    else:
+        return True
+
+
+
 # = None ,means default
 # 4.17 链接小飞机试试
+# 失败
 @app.get("/little")
 async def test():
     print("---------------little:")
