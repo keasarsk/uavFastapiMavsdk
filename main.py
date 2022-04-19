@@ -1,40 +1,61 @@
 
 # from __future__ import all_feature_names
 # from msilib.schema import tables
-from fastapi import FastAPI
+import imp
 import os
+
+from fastapi import FastAPI
+from numpy import double
 # import sys
 from pydantic import BaseModel
 
-
 app = FastAPI()
+# class MissionItems(BaseModel):
+#     routeLine = []
+#     altitude: float
+#     camera: str
+#     speed_m_s = []
+#     camera_photo_interval_s = []
+#     yaw_deg = []
+#     camera_action = []
+#     relative_altitude_m = []
+#     def get_info(self):
+#         latitude_deg = []
+#         longitude_deg = []
+
+#         for i in self.routeLine:
+#             # dictA = i
+#             latitude_deg.append(i['lat'])
+#             longitude_deg.append(i['lng'])
+
+#         print("self.altitude[:-1]",self.altitude[:-1])
+#         altitude_num = float(self.altitude[:-1])
+#         self.relative_altitude_m.append(altitude_num)
+#         self.camera_action.append(self.camera)
+#         camera_photo_interval_s = self.camera_photo_interval_s
+#         yaw_deg = self.yaw_deg
+#         return latitude_deg,longitude_deg,self.relative_altitude_m,\
+#                self.speed_m_s,self.camera_action,camera_photo_interval_s,yaw_deg
+
+# 按照师姐写
 class MissionItems(BaseModel):
-    routeLine = []
-    altitude: str
-    camera: str
-    speed_m_s = []
-    # camera_photo_interval_s = []
-    # yaw_deg = []
-    camera_action = []
+    # 经纬度列表 double
+    lat = []
+    lon = []
+    # 相对高度列表 float
     relative_altitude_m = []
-    def get_info(self):
-        latitude_deg = []
-        longitude_deg = []
-
-        for i in self.routeLine:
-            # dictA = i
-            latitude_deg.append(i['lat'])
-            longitude_deg.append(i['lng'])
-
-        print("self.altitude[:-1]",self.altitude[:-1])
-        altitude_num = float(self.altitude[:-1])
-        self.relative_altitude_m.append(altitude_num)
-        self.camera_action.append(self.camera)
-        camera_photo_interval_s = self.camera_photo_interval_s
-        yaw_deg = self.yaw_deg
-        return latitude_deg,longitude_deg,self.relative_altitude_m,\
-               self.speed_m_s,self.camera_action,camera_photo_interval_s,yaw_deg
-
+    # 飞行速度列表 float
+    speed_m_s = []
+    # 飞过还是停在航点列表 bool
+    is_fly_through = []
+    # 任务点触发的相机动作列表 CameraAction:
+    camera_action = []
+    # 停留时间列表 float
+    loiter_time_s = []
+    
+    def getInfo(self):
+        return self.lat , self.lon , self.relative_altitude_m , self.speed_m_s , self.is_fly_through , self.camera_action , self.loiter_time_s
+    
 
 
 
@@ -44,6 +65,7 @@ class MissionItems(BaseModel):
 # 4.19 大无人机任务测试
 # 活命令
 from bigmission import bigmission
+
 bmission = bigmission()
 @app.post("/{uav_num}/bigmission")
 async def bigmission(uav_num: str,missionItems: MissionItems):
@@ -79,6 +101,7 @@ async def test():
 # 3.15 实机任务测试
 # 死命令
 from bigmissiontest import bigmissiontest
+
 bigmissionT = bigmissiontest()
 @app.get("/missiontest")
 async def test():
@@ -90,7 +113,8 @@ async def test():
         return True
 
 
-from uav_all_test import uav_all_test 
+from uav_all_test import uav_all_test
+
 allarm = uav_all_test()
 @app.get("/armAll")
 async def armAll():
@@ -103,6 +127,7 @@ async def armAll():
 
 
 from takeoff import takeoff
+
 tkoff = takeoff()
 @app.get("/{uav_num}/fly/takeoff")
 async def takeoff(uav_num: str):
@@ -163,20 +188,43 @@ async def takeoff(uav_num: str):
     #     relative_altitude_m = self.relative_altitude_m
     #     speed_m_s = self.speed_m_s
     #     return latitude_deg, longitude_deg, relative_altitude_m, speed_m_s
+    
+# 仿真任务测试json
+from missionsitl import msitl
+misitl = msitl()
+from mavsdk.mission import MissionItem
 @app.post("/{uav_num}/mission")
 async def mission(uav_num: str,missionItems: MissionItems):
     uav_port = str(int(uav_num[-1]) + 14540)
-    itemsss = missionItems.get_info()
-    print("itemsss:", itemsss)
+    misitl.uavport = uav_port
+    # 获得传进来的json内容
+    print("missionItems.lat-------",missionItems.lat)
+    print("missionItems.lat[0]-------",missionItems.lat[0])
+    # 在这里就把数据转成MissionItem格式
+    missionItemlistmain = []
+    i = 0
+    while (i<len(missionItems.lat)):
+        missionItemlistmain.append(MissionItem(double(missionItems.lat[i]),
+                                                double(missionItems.lon[0]),
+                                                float(missionItems.relative_altitude_m[i]),
+                                                float(missionItems.speed_m_s[i]),
+                                                bool(missionItems.is_fly_through[i]),
+                                                float('nan'),
+                                                float('nan'),
+                                                MissionItem.CameraAction.NONE,
+                                                float(missionItems.loiter_time_s[i]),
+                                                float('nan'),
+                                                float('nan'),
+                                                float('nan')
+                                                ))
+        print("missionItemlistmain[i]" , missionItemlistmain[i])
+        i += 1
 
-    # writter into mission_items.txt
-    with  open('mission_items.txt', 'w') as mission_items_txt:
-        for i in itemsss:
-            i = str(i)
-            mission_items_txt.write(i + '\n')
-        mission_items_txt.close()
+    # 赋值给misitl.missionItemlist
+    misitl.missionItemlist = missionItemlistmain
 
-    if os.system('python mission2.py ' + uav_port):
+    # return True
+    if await misitl.run():
         return False
     else:
         return True
@@ -212,6 +260,7 @@ async def mission(uav_num: str,missionItems: MissionItems):
 #         return True
 
 from land import land
+
 lad = land()
 @app.get("/{uav_num}/fly/land")
 async def land(uav_num: str):
@@ -253,6 +302,7 @@ async def logfile(uav_num: str):
 
 # 升高的一定高度 返回发射位置并着陆
 from return_to_launch import returntolaunch
+
 returnlaunch = returntolaunch()
 @app.get("/{uav_num}/returntolaunch")
 async def relaunch(uav_num: str):
@@ -266,6 +316,7 @@ async def relaunch(uav_num: str):
 
 # 需要传入一个坐标 未完善
 from goto import goto
+
 gt = goto()
 @app.get("/{uav_num}/goto")
 async def gto(uav_num: str):
@@ -288,6 +339,7 @@ async def followme(uav_num: str):
 # 4.18
 # 4.18 无人机日志
 from Location_log import Location_log
+
 log = Location_log()
 @app.get("/{uav_num}/log")
 async def location(uav_num: str):

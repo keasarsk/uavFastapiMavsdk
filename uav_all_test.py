@@ -4,7 +4,7 @@ import asyncio
 from mavsdk import System
 
 class uav_all_test():
-    async def run():
+    async def run(self):
         drone = System()
         if (await drone.connect(system_address="udp://:14540")):
             print("uav0---false!")
