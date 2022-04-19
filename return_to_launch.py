@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import asyncio
-from main import returntolaunch
+# from main import returntolaunch
 from mavsdk import System
 import sys
 

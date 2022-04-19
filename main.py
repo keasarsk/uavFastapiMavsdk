@@ -255,7 +255,7 @@ async def logfile(uav_num: str):
 from return_to_launch import returntolaunch
 returnlaunch = returntolaunch()
 @app.get("/{uav_num}/returntolaunch")
-async def returntolaunch(uav_num: str):
+async def relaunch(uav_num: str):
     uav_port = str(int(uav_num[-1]) + 14540)
     # if os.system('python3 return_to_launch.py ' + uav_port):
     if await returnlaunch.run():
@@ -268,7 +268,7 @@ async def returntolaunch(uav_num: str):
 from goto import goto
 gt = goto()
 @app.get("/{uav_num}/goto")
-async def goto(uav_num: str):
+async def gto(uav_num: str):
     uav_port = str(int(uav_num[-1]) + 14540)
     # if os.system('python3 goto.py ' + uav_port):
     if await gt.run():
