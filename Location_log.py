@@ -2,21 +2,16 @@
 
 import asyncio
 from mavsdk import System
-# from mavsdk import telemetry
-# import sys
-
-# from main import location
 
 class Location_log:
+    num = str
     battery = []
     location = []
-    # def __init__(self):
-        # start()
 
     async def run(self):
 
         drone = System()
-        await drone.connect(system_address="udp://:14540")
+        await drone.connect(system_address="udp://:1454" + self.num)
 
         print("Waiting for drone to connect...")
         async for state in drone.core.connection_state():
@@ -30,7 +25,6 @@ class Location_log:
                 print("Global position estimate ok")
                 break
 
-        print("arm")
         await drone.action.arm()
 
         # 电池电压和电量百分数
@@ -40,7 +34,7 @@ class Location_log:
             self.battery = terrain_info2
             break
 
-        # ---------------------position()当前位置（更新当前位置）
+        # position()当前位置（更新当前位置）
         # Position: [latitude_deg: 47.3977693, longitude_deg: 8.545593499999999, absolute_altitude_m: 488.0790100097656, relative_altitude_m: 0.009000000543892384]
         print(" drone.telemetry.position()")
         async for terrain_info5 in drone.telemetry.position():
@@ -50,28 +44,4 @@ class Location_log:
             print("----------------------")
             print(self.location)
             print("----------------------")
-            
             break
-
-        # # ----------------------home()更新home为当前位置
-        # print(" drone.telemetry.home()")
-        # async for terrain_info7 in drone.telemetry.home():
-        #     print(terrain_info7)
-        #     break
-
-    # async def get(self):
-    #     return self.location
-
-    async def start(self):
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(self.run())
-        # loop.run_forever(self.run())
-        # loop.close()
-        # print(a)
-        
-# if __name__ == '__main__':
-#     a = Location_log()
-#     a.start()
-    # a.run()
-    # a.test()
-    # a.run()

@@ -1,24 +1,69 @@
 
+# from __future__ import all_feature_names
+# from msilib.schema import tables
 from fastapi import FastAPI
 import os
-import sys
-from Location_log import Location_log
+# import sys
 from pydantic import BaseModel
 
 
 app = FastAPI()
+class MissionItems(BaseModel):
+    routeLine = []
+    altitude: str
+    camera: str
+    speed_m_s = []
+    # camera_photo_interval_s = []
+    # yaw_deg = []
+    camera_action = []
+    relative_altitude_m = []
+    def get_info(self):
+        latitude_deg = []
+        longitude_deg = []
 
-# 4.18 大无人机的日志
-@app.get("/{uav_num}/logbig")
-async def logfile(uav_num: str):
-    if os.system('python3 log.py '):
-        return False
-    else:
-        return True
+        for i in self.routeLine:
+            # dictA = i
+            latitude_deg.append(i['lat'])
+            longitude_deg.append(i['lng'])
+
+        print("self.altitude[:-1]",self.altitude[:-1])
+        altitude_num = float(self.altitude[:-1])
+        self.relative_altitude_m.append(altitude_num)
+        self.camera_action.append(self.camera)
+        camera_photo_interval_s = self.camera_photo_interval_s
+        yaw_deg = self.yaw_deg
+        return latitude_deg,longitude_deg,self.relative_altitude_m,\
+               self.speed_m_s,self.camera_action,camera_photo_interval_s,yaw_deg
 
 
 
-# = None ,means default
+
+
+
+
+# 4.19 大无人机任务测试
+# 活命令
+from bigmission import bigmission
+bmission = bigmission()
+@app.post("/{uav_num}/bigmission")
+async def bigmission(uav_num: str,missionItems: MissionItems):
+    if uav_num ==1 :
+        bmission.num = "192.168.1.81:8080"
+    elif uav_num == 2:
+        bmission.num = "192.168.1.181:8080"
+    print("bmission.num--------" , bmission.num)
+    itemsss = missionItems.get_info()
+    print("itemsss---------", itemsss)
+    bmission.missionlist = itemsss
+    print("bmission.missionlist---------", bmission.missionlist)
+
+    return True
+    # if await bmission.run():
+    #     return False
+    # else:
+    #     return True
+
+
 # 4.17 链接小飞机试试
 # 失败
 @app.get("/little")
@@ -32,44 +77,38 @@ async def test():
 
 
 # 3.15 实机任务测试
-@app.get("/test")
-async def test():
-    print("---------------tesst:")
-    if os.system('python test.py'):
-        return False
-    else:
-        return True
-
-
-# 3.15 实机任务测试
+# 死命令
+from bigmissiontest import bigmissiontest
+bigmissionT = bigmissiontest()
 @app.get("/missiontest")
 async def test():
-    print("---------------missiontest:")
-    if os.system('python missiontest.py'):
+    print("---------------bigmissiontest:")
+    # if os.system('python missiontest.py'):
+    if await bigmissionT.run():
         return False
     else:
         return True
 
 
-
+from uav_all_test import uav_all_test 
+allarm = uav_all_test()
 @app.get("/armAll")
 async def armAll():
     print("---------------arm all uav:")
-    if os.system('python3 uav_all_test.py'):
+    if await allarm.run():
+        # if os.system('python3 uav_all_test.py'):
         return False
     else:
         return True
 
-class uav_info(BaseModel):
-    uav: str
-    def get_uav_info(self):
-        uav_num = self.uav
-        return uav_num[-1]
 
+from takeoff import takeoff
+tkoff = takeoff()
 @app.get("/{uav_num}/fly/takeoff")
 async def takeoff(uav_num: str):
     uav_port = str(int(uav_num[-1]) + 14540)
-    if os.system('python takeoff.py ' + uav_port):
+    # if os.system('python takeoff.py ' + uav_port):
+    if await tkoff.run():
         return False
     else:
         return True
@@ -103,32 +142,6 @@ async def takeoff(uav_num: str):
 
 # -------------------mission_items------------------
 
-class MissionItems(BaseModel):
-    routeLine = []
-    altitude: str
-    camera: str
-    speed_m_s = []
-    # camera_photo_interval_s = []
-    # yaw_deg = []
-    camera_action = []
-    relative_altitude_m = []
-    def get_info(self):
-        latitude_deg = []
-        longitude_deg = []
-
-        for i in self.routeLine:
-            # dictA = i
-            latitude_deg.append(i['lat'])
-            longitude_deg.append(i['lng'])
-
-        print("self.altitude[:-1]",self.altitude[:-1])
-        altitude_num = float(self.altitude[:-1])
-        self.relative_altitude_m.append(altitude_num)
-        self.camera_action.append(self.camera)
-        camera_photo_interval_s = self.camera_photo_interval_s
-        yaw_deg = self.yaw_deg
-        return latitude_deg,longitude_deg,self.relative_altitude_m,\
-               self.speed_m_s,self.camera_action,camera_photo_interval_s,yaw_deg
 
     # 行得通的简易版:
     # json:
@@ -153,11 +166,6 @@ class MissionItems(BaseModel):
 @app.post("/{uav_num}/mission")
 async def mission(uav_num: str,missionItems: MissionItems):
     uav_port = str(int(uav_num[-1]) + 14540)
-
-    # print("type(missionItems.routeLine):",type(missionItems.routeLine),missionItems.routeLine)
-    # print("type(missionItems.routeLine[1]):", type(missionItems.routeLine[1]), missionItems.routeLine[1])
-    # itemsss = list(missionItems.get_info())
-    # print("type(missionItems)",type(missionItems.get_info()),missionItems.get_info())
     itemsss = missionItems.get_info()
     print("itemsss:", itemsss)
 
@@ -189,28 +197,32 @@ async def mission(uav_num: str,missionItems: MissionItems):
         mission_items_txt.close()
 
     print("---------------missiontest2222:")
-    if os.system('python missiontest2.py '):
+    if os.system('python bigmissiontest.py '):
         return False
     else:
         return True
 
 
-@app.get("/{uav_num}/pause_mission")
-async def land(uav_num: str):
-    uav_port = str(int(uav_num[-1]) + 14540)
-    if os.system('python3 pausemission.py ' + uav_port):
-        return False
-    else:
-        return True
+# @app.get("/{uav_num}/pause_mission")
+# async def land(uav_num: str):
+#     uav_port = str(int(uav_num[-1]) + 14540)
+#     if os.system('python3 pausemission.py ' + uav_port):
+#         return False
+#     else:
+#         return True
 
+from land import land
+lad = land()
 @app.get("/{uav_num}/fly/land")
 async def land(uav_num: str):
     uav_port = str(int(uav_num[-1]) + 14540)
-    if os.system('python3 land.py ' + uav_port):
+    # if os.system('python3 land.py ' + uav_port):
+    if await lad.run():
         return False
     else:
         return True
 
+# 好像并没有什么用
 @app.get("/{uav_num}/keyboardControl")
 async def keyboardControl(uav_num: str):
     uav_port = str(int(uav_num[-1]) + 14540)
@@ -219,16 +231,17 @@ async def keyboardControl(uav_num: str):
     else:
         return True
 
+# 这个也不能轻易用
+# @app.get("/{uav_num}/shutdown")
+# async def shutdown(uav_num: str):
+#     uav_port = str(int(uav_num[-1]) + 14540)
+#     if os.system('python3 shutdown.py ' + uav_port):
+#         return False
+#     else:
+#         return True
 
-@app.get("/{uav_num}/shutdown")
-async def shutdown(uav_num: str):
-    uav_port = str(int(uav_num[-1]) + 14540)
-    if os.system('python3 shutdown.py ' + uav_port):
-        return False
-    else:
-        return True
 
-
+# 下载日志文件 这个现在下载在了本地
 @app.get("/{uav_num}/logfile")
 async def logfile(uav_num: str):
     uav_port = str(int(uav_num[-1]) + 14540)
@@ -238,24 +251,32 @@ async def logfile(uav_num: str):
         return True
 
 
+# 升高的一定高度 返回发射位置并着陆
+from return_to_launch import returntolaunch
+returnlaunch = returntolaunch()
 @app.get("/{uav_num}/returntolaunch")
 async def returntolaunch(uav_num: str):
     uav_port = str(int(uav_num[-1]) + 14540)
-    if os.system('python3 return_to_launch.py ' + uav_port):
+    # if os.system('python3 return_to_launch.py ' + uav_port):
+    if await returnlaunch.run():
         return False
     else:
         return True
 
 
+# 需要传入一个坐标 未完善
+from goto import goto
+gt = goto()
 @app.get("/{uav_num}/goto")
 async def goto(uav_num: str):
     uav_port = str(int(uav_num[-1]) + 14540)
-    if os.system('python3 goto.py ' + uav_port):
+    # if os.system('python3 goto.py ' + uav_port):
+    if await gt.run():
         return False
     else:
         return True
 
-
+# 未完善 暂时意义不大
 @app.get("/{uav_num}/followme")
 async def followme(uav_num: str):
     uav_port = str(int(uav_num[-1]) + 14540)
@@ -264,30 +285,15 @@ async def followme(uav_num: str):
     else:
         return True
 
-# 4.18 师姐日至
-# 存uav的日至
-class uavInfo(BaseModel):
-    # battery = []
-    # 当前任务列表
-    # routeLine = []
-    # 当前相机状态
-    # camera: str
-    # 当前飞行速度
-    # speed_m_s = []
-    # camera_photo_interval_s = []
-    # yaw_deg = []
-    # camera_action = []
-    position = []
-    battery = []
-
-
+# 4.18
+# 4.18 无人机日志
+from Location_log import Location_log
 log = Location_log()
-location = []
-battery = []
-
 @app.get("/{uav_num}/log")
 async def location(uav_num: str):
-    uav_port = str(int(uav_num[-1]) + 14540)
+    log.num = uav_num
+    print("log.num-----")
+    print(log.num)
     if await log.run():
         return log.battery , log.location
     else:
@@ -298,16 +304,17 @@ async def location(uav_num: str):
 
 
 
-@app.get("/{uav_num}/location")
-async def location(uav_num: str):
+# @app.get("/{uav_num}/location")
+# async def location(uav_num: str):
     
-    uav_port = str(int(uav_num[-1]) + 14540)
-    if os.system('python3 location_now.py ' + uav_port):
-        return False
-    else:
-        return True
+#     uav_port = str(int(uav_num[-1]) + 14540)
+#     if os.system('python3 location_now.py ' + uav_port):
+#         return False
+#     else:
+#         return True
 
 
+# 这个等推流吧
 @app.get("/{uav_num}/camera")
 async def camera(uav_num: str):
     uav_port = str(int(uav_num[-1]) + 14540)
@@ -316,7 +323,7 @@ async def camera(uav_num: str):
     else:
         return True
 
-
+# 意义不大
 @app.get("/{uav_num}/manualcontrol")
 async def manualcontrol(uav_num: str):
     uav_port = str(int(uav_num[-1]) + 14540)
@@ -325,21 +332,6 @@ async def manualcontrol(uav_num: str):
     else:
         return True
 
-
-
-# --------------------auto disarming
-# # @app.get("/disarm")
-# async def root():
-#     finish = False
-#     if os.system('python3 disarm.py'):
-#         finish = True
-#
-#     return finish
-
-
-# @app.get("/sleep/")
-# async def root():
-#     return dictA
 
 
 if __name__ == "__main__":
