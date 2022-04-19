@@ -219,12 +219,48 @@ async def mission(uav_num: str,missionItems: MissionItems):
                                                 ))
         print("missionItemlistmain[i]" , missionItemlistmain[i])
         i += 1
-
     # 赋值给misitl.missionItemlist
     misitl.missionItemlist = missionItemlistmain
-
-    # return True
     if await misitl.run():
+        return False
+    else:
+        return True
+
+# 4.20 实机任务测试json
+# 大无人机任务测试json
+from missionbigjson import missionbigjson
+missbig = missionbigjson()
+from mavsdk.mission import MissionItem
+@app.post("/{uav_num}/missionbigjson")
+async def mission(uav_num: str,missionItems: MissionItems):
+    if uav_num ==1 :
+        uav_port = "192.168.1.81:8080"
+    elif uav_num == 2:
+        uav_port = "192.168.1.181:8080"
+    
+    missbig.uavport = uav_port
+    # 在这里就把数据转成MissionItem格式
+    missionItemlistmain = []
+    i = 0
+    while (i<len(missionItems.lat)):
+        missionItemlistmain.append(MissionItem(double(missionItems.lat[i]),
+                                                double(missionItems.lon[0]),
+                                                float(missionItems.relative_altitude_m[i]),
+                                                float(missionItems.speed_m_s[i]),
+                                                bool(missionItems.is_fly_through[i]),
+                                                float('nan'),
+                                                float('nan'),
+                                                MissionItem.CameraAction.NONE,
+                                                float(missionItems.loiter_time_s[i]),
+                                                float('nan'),
+                                                float('nan'),
+                                                float('nan')
+                                                ))
+        print("missionItemlistmain[i]" , missionItemlistmain[i])
+        i += 1
+    # 赋值给missbig.missionItemlist
+    missbig.missionItemlist = missionItemlistmain
+    if await missbig.run():
         return False
     else:
         return True
