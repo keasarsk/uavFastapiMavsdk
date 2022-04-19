@@ -1,7 +1,8 @@
 
 # from __future__ import all_feature_names
 # from msilib.schema import tables
-import imp
+# import imp
+from operator import truediv
 import os
 
 from fastapi import FastAPI
@@ -230,21 +231,21 @@ async def mission(uav_num: str,missionItems: MissionItems):
 # 大无人机任务测试json
 from missionbigjson import missionbigjson
 missbig = missionbigjson()
-from mavsdk.mission import MissionItem
 @app.post("/{uav_num}/missionbigjson")
 async def mission(uav_num: str,missionItems: MissionItems):
-    if uav_num ==1 :
+    if uav_num =='1' :
         uav_port = "192.168.1.81:8080"
-    elif uav_num == 2:
+    elif uav_num == '2' :
         uav_port = "192.168.1.181:8080"
-    
+    print(uav_port)
     missbig.uavport = uav_port
+    print("missbig.uavport---------",missbig.uavport)
     # 在这里就把数据转成MissionItem格式
     missionItemlistmain = []
     i = 0
     while (i<len(missionItems.lat)):
         missionItemlistmain.append(MissionItem(double(missionItems.lat[i]),
-                                                double(missionItems.lon[0]),
+                                                double(missionItems.lon[i]),
                                                 float(missionItems.relative_altitude_m[i]),
                                                 float(missionItems.speed_m_s[i]),
                                                 bool(missionItems.is_fly_through[i]),
@@ -260,10 +261,12 @@ async def mission(uav_num: str,missionItems: MissionItems):
         i += 1
     # 赋值给missbig.missionItemlist
     missbig.missionItemlist = missionItemlistmain
-    if await missbig.run():
-        return False
-    else:
-        return True
+    print("missbig.missionItemlist-------",missbig.missionItemlist)
+    return True
+    # if await missbig.run():
+    #     return False
+    # else:
+    #     return True
 
 
 # 3.15 实机测试mission 把任务写进文件
