@@ -255,6 +255,7 @@ async def mission(uav_num: str,missionItems: MissionItems):
                                                 float(missionItems.loiter_time_s[i]),
                                                 float('nan'),
                                                 float('nan'),
+                                                float('nan'),
                                                 float('nan')
                                                 ))
         print("missionItemlistmain[i]" , missionItemlistmain[i])
