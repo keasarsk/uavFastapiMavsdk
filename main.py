@@ -63,24 +63,24 @@ class MissionItems(BaseModel):
 
 
 
-# 4.19 大无人机任务测试
-# 活命令
-from bigmission import bigmission
+# # 4.19 大无人机任务测试
+# # 活命令
+# from bigmission import bigmission
 
-bmission = bigmission()
-@app.post("/{uav_num}/bigmission")
-async def bigmission(uav_num: str,missionItems: MissionItems):
-    if uav_num ==1 :
-        bmission.num = "192.168.1.81:8080"
-    elif uav_num == 2:
-        bmission.num = "192.168.1.181:8080"
-    print("bmission.num--------" , bmission.num)
-    itemsss = missionItems.get_info()
-    print("itemsss---------", itemsss)
-    bmission.missionlist = itemsss
-    print("bmission.missionlist---------", bmission.missionlist)
+# bmission = bigmission()
+# @app.post("/{uav_num}/bigmission")
+# async def bigmission(uav_num: str,missionItems: MissionItems):
+#     if uav_num ==1 :
+#         bmission.num = "192.168.1.81:8080"
+#     elif uav_num == 2:
+#         bmission.num = "192.168.1.181:8080"
+#     print("bmission.num--------" , bmission.num)
+#     itemsss = missionItems.get_info()
+#     print("itemsss---------", itemsss)
+#     bmission.missionlist = itemsss
+#     print("bmission.missionlist---------", bmission.missionlist)
 
-    return True
+#     return True
     # if await bmission.run():
     #     return False
     # else:
@@ -105,7 +105,7 @@ from bigmissiontest import bigmissiontest
 
 bigmissionT = bigmissiontest()
 @app.get("/missiontest")
-async def test():
+async def missiontest():
     print("---------------bigmissiontest:")
     # if os.system('python missiontest.py'):
     if await bigmissionT.run():
@@ -114,13 +114,26 @@ async def test():
         return True
 
 
+# 全部arm
 from uav_all_test import uav_all_test
-
 allarm = uav_all_test()
 @app.get("/armAll")
 async def armAll():
     print("---------------arm all uav:")
     if await allarm.run():
+        # if os.system('python3 uav_all_test.py'):
+        return False
+    else:
+        return True
+
+
+
+from bigarm import big
+al = big()
+@app.get("/bigarm")
+async def bigarm():
+    print("---------------arm bigbigbig:")
+    if await al.run():
         # if os.system('python3 uav_all_test.py'):
         return False
     else:
@@ -233,10 +246,11 @@ from missionbigjson import missionbigjson
 missbig = missionbigjson()
 @app.post("/{uav_num}/missionbigjson")
 async def mission(uav_num: str,missionItems: MissionItems):
-    if uav_num =='1' :
+    if uav_num =="1" :
         uav_port = "192.168.1.81:8080"
-    elif uav_num == '2' :
-        uav_port = "192.168.1.181:8080"
+    elif uav_num == "2" :
+        uav_port = "192.168.1.191:8080"
+    # uav_port = "192.168.1.191:8080"
     print(uav_port)
     missbig.uavport = uav_port
     print("missbig.uavport---------",missbig.uavport)
@@ -263,11 +277,11 @@ async def mission(uav_num: str,missionItems: MissionItems):
     # 赋值给missbig.missionItemlist
     missbig.missionItemlist = missionItemlistmain
     print("missbig.missionItemlist-------",missbig.missionItemlist)
-    return True
-    # if await missbig.run():
-    #     return False
-    # else:
-    #     return True
+    # return True
+    if await missbig.run():
+        return False
+    else:
+        return True
 
 
 # 3.15 实机测试mission 把任务写进文件
@@ -383,9 +397,13 @@ from Location_log import Location_log
 log = Location_log()
 @app.get("/{uav_num}/log")
 async def location(uav_num: str):
-    log.num = uav_num
-    print("log.num-----")
-    print(log.num)
+    if uav_num =='1' :
+        uav_port = "192.168.1.81:8080"
+    elif uav_num == '2' :
+        uav_port = "192.168.1.191:8080"
+    log.uavport = uav_port
+    print("log.uavport-----")
+    print(log.uavport)
     if await log.run():
         return log.battery , log.location
     else:

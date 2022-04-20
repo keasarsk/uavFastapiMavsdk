@@ -6,7 +6,7 @@ from mavsdk import System
 from mavsdk.mission import (MissionItem, MissionPlan)
 
 class bigmissiontest():
-    async def run():
+    async def run(self):
         print("MissionTestWaiting...")
 
         drone = System()
@@ -101,14 +101,14 @@ class bigmissiontest():
 
 
 
-    async def print_mission_progress(drone):
+    async def print_mission_progress(self,drone):
         async for mission_progress in drone.mission.mission_progress():
             print(f"Mission progress: "
                 f"{mission_progress.current}/"
                 f"{mission_progress.total}")
 
 
-    async def observe_is_in_air(drone, running_tasks):
+    async def observe_is_in_air(self,drone, running_tasks):
         """ Monitors whether the drone is flying or not and
         returns after landing """
 

@@ -9,7 +9,7 @@ from mavsdk import System
 # from main import location
 
 class Location_log:
-    num = ""
+    uavport = ""
     battery = []
     location = []
 
@@ -17,7 +17,9 @@ class Location_log:
 
         drone = System()
         # await drone.connect(system_address="udp://:" + uav_port)
-        await drone.connect(system_address="udp://:1454" + self.num)
+        # await drone.connect(system_address="udp://:1454" + self.num)
+        await drone.connect(system_address="tcp://"+ self.uavport)
+
 
         print("Waiting for drone to connect...")
         async for state in drone.core.connection_state():
