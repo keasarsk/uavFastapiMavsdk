@@ -11,6 +11,7 @@ from numpy import double
 from pydantic import BaseModel
 
 app = FastAPI()
+
 # class MissionItems(BaseModel):
 #     routeLine = []
 #     altitude: float
@@ -58,35 +59,6 @@ class MissionItems(BaseModel):
         return self.lat , self.lon , self.relative_altitude_m , self.speed_m_s , self.is_fly_through , self.camera_action , self.loiter_time_s
     
 
-
-
-
-
-
-# # 4.19 大无人机任务测试
-# # 活命令
-# from bigmission import bigmission
-
-# bmission = bigmission()
-# @app.post("/{uav_num}/bigmission")
-# async def bigmission(uav_num: str,missionItems: MissionItems):
-#     if uav_num ==1 :
-#         bmission.num = "192.168.1.81:8080"
-#     elif uav_num == 2:
-#         bmission.num = "192.168.1.181:8080"
-#     print("bmission.num--------" , bmission.num)
-#     itemsss = missionItems.get_info()
-#     print("itemsss---------", itemsss)
-#     bmission.missionlist = itemsss
-#     print("bmission.missionlist---------", bmission.missionlist)
-
-#     return True
-    # if await bmission.run():
-    #     return False
-    # else:
-    #     return True
-
-
 # 4.17 链接小飞机试试
 # 失败
 @app.get("/little")
@@ -99,22 +71,10 @@ async def test():
 
 
 
-# 3.15 实机任务测试
-# 死命令
-from bigmissiontest import bigmissiontest
-
-bigmissionT = bigmissiontest()
-@app.get("/missiontest")
-async def missiontest():
-    print("---------------bigmissiontest:")
-    # if os.system('python missiontest.py'):
-    if await bigmissionT.run():
-        return False
-    else:
-        return True
 
 
-# 全部arm
+
+# 仿真全部arm
 from uav_all_test import uav_all_test
 allarm = uav_all_test()
 @app.get("/armAll")
@@ -128,22 +88,11 @@ async def armAll():
 
 
 
-from bigarm import big
-al = big()
-@app.get("/bigarm")
-async def bigarm():
-    print("---------------arm bigbigbig:")
-    if await al.run():
-        # if os.system('python3 uav_all_test.py'):
-        return False
-    else:
-        return True
 
-
+# 仿真takeoff
 from takeoff import takeoff
-
 tkoff = takeoff()
-@app.get("/{uav_num}/fly/takeoff")
+@app.get("/{uav_num}/sitl/takeoff")
 async def takeoff(uav_num: str):
     uav_port = str(int(uav_num[-1]) + 14540)
     # if os.system('python takeoff.py ' + uav_port):
@@ -203,82 +152,17 @@ async def takeoff(uav_num: str):
     #     speed_m_s = self.speed_m_s
     #     return latitude_deg, longitude_deg, relative_altitude_m, speed_m_s
     
-# 仿真任务测试json
-from missionsitl import msitl
-misitl = msitl()
-from mavsdk.mission import MissionItem
-@app.post("/{uav_num}/mission")
-async def mission(uav_num: str,missionItems: MissionItems):
-    uav_port = str(int(uav_num[-1]) + 14540)
-    misitl.uavport = uav_port
-    # 获得传进来的json内容
-    print("missionItems.lat-------",missionItems.lat)
-    print("missionItems.lat[0]-------",missionItems.lat[0])
-    # 在这里就把数据转成MissionItem格式
-    missionItemlistmain = []
-    i = 0
-    while (i<len(missionItems.lat)):
-        missionItemlistmain.append(MissionItem(double(missionItems.lat[i]),
-                                                double(missionItems.lon[0]),
-                                                float(missionItems.relative_altitude_m[i]),
-                                                float(missionItems.speed_m_s[i]),
-                                                bool(missionItems.is_fly_through[i]),
-                                                float('nan'),
-                                                float('nan'),
-                                                MissionItem.CameraAction.NONE,
-                                                float(missionItems.loiter_time_s[i]),
-                                                float('nan'),
-                                                float('nan'),
-                                                float('nan')
-                                                ))
-        print("missionItemlistmain[i]" , missionItemlistmain[i])
-        i += 1
-    # 赋值给misitl.missionItemlist
-    misitl.missionItemlist = missionItemlistmain
-    if await misitl.run():
-        return False
-    else:
-        return True
 
-# 4.20 实机任务测试json
-# 大无人机任务测试json
-from missionbigjson import missionbigjson
-missbig = missionbigjson()
-@app.post("/{uav_num}/missionbigjson")
-async def mission(uav_num: str,missionItems: MissionItems):
-    if uav_num =="1" :
-        uav_port = "192.168.1.81:8080"
-    elif uav_num == "2" :
-        uav_port = "192.168.1.191:8080"
-    # uav_port = "192.168.1.191:8080"
-    print(uav_port)
-    missbig.uavport = uav_port
-    print("missbig.uavport---------",missbig.uavport)
-    # 在这里就把数据转成MissionItem格式
-    missionItemlistmain = []
-    i = 0
-    while (i<len(missionItems.lat)):
-        missionItemlistmain.append(MissionItem(double(missionItems.lat[i]),
-                                                double(missionItems.lon[i]),
-                                                float(missionItems.relative_altitude_m[i]),
-                                                float(missionItems.speed_m_s[i]),
-                                                bool(missionItems.is_fly_through[i]),
-                                                float('nan'),
-                                                float('nan'),
-                                                MissionItem.CameraAction.NONE,
-                                                float(missionItems.loiter_time_s[i]),
-                                                float('nan'),
-                                                float('nan'),
-                                                float('nan'),
-                                                float('nan')
-                                                ))
-        print("missionItemlistmain[i]" , missionItemlistmain[i])
-        i += 1
-    # 赋值给missbig.missionItemlist
-    missbig.missionItemlist = missionItemlistmain
-    print("missbig.missionItemlist-------",missbig.missionItemlist)
-    # return True
-    if await missbig.run():
+
+# 3.15 实机任务测试
+# 80大无人机 死命令
+from bigmissiontest import bigmissiontest
+bigmissionT = bigmissiontest()
+@app.get("/missiontest")
+async def missiontest():
+    print("---------------bigmissiontest:")
+    # if os.system('python missiontest.py'):
+    if await bigmissionT.run():
         return False
     else:
         return True
@@ -305,18 +189,11 @@ async def mission(uav_num: str,missionItems: MissionItems):
         return True
 
 
-# @app.get("/{uav_num}/pause_mission")
-# async def land(uav_num: str):
-#     uav_port = str(int(uav_num[-1]) + 14540)
-#     if os.system('python3 pausemission.py ' + uav_port):
-#         return False
-#     else:
-#         return True
 
+# 仿真land
 from land import land
-
 lad = land()
-@app.get("/{uav_num}/fly/land")
+@app.get("/{uav_num}/sitl/land")
 async def land(uav_num: str):
     uav_port = str(int(uav_num[-1]) + 14540)
     # if os.system('python3 land.py ' + uav_port):
@@ -390,24 +267,6 @@ async def followme(uav_num: str):
     else:
         return True
 
-# 4.18
-# 4.18 无人机日志
-from Location_log import Location_log
-
-log = Location_log()
-@app.get("/{uav_num}/log")
-async def location(uav_num: str):
-    if uav_num =='1' :
-        uav_port = "192.168.1.81:8080"
-    elif uav_num == '2' :
-        uav_port = "192.168.1.191:8080"
-    log.uavport = uav_port
-    print("log.uavport-----")
-    print(log.uavport)
-    if await log.run():
-        return log.battery , log.location
-    else:
-        return log.battery , log.location
 
 
 
@@ -443,6 +302,167 @@ async def manualcontrol(uav_num: str):
         return True
 
 
+
+# 4.18
+# 4.18 大无人机日志
+from Location_log import Location_log
+log = Location_log()
+@app.get("/{uav_num}/biglog")
+async def location(uav_num: str):
+    if uav_num =="1" :
+        uav_port = "192.168.1.81:8080"
+    elif uav_num == "2" :
+        uav_port = "192.168.1.191:8080"
+    log.uavport = uav_port
+    # print("log.uavport-----")
+    print(log.uavport)
+    if await log.run():
+        return log.battery , log.location
+    else:
+        return log.battery , log.location
+
+
+
+# 4.19
+# 仿真任务测试json
+from missionsitl import msitl
+misitl = msitl()
+from mavsdk.mission import MissionItem
+@app.post("/{uav_num}/sitlmission")
+async def mission(uav_num: str,missionItems: MissionItems):
+    uav_port = str(int(uav_num[-1]) + 14540)
+    misitl.uavport = uav_port
+    # 获得传进来的json内容
+    print("missionItems.lat-------",missionItems.lat)
+    print("missionItems.lat[0]-------",missionItems.lat[0])
+    # 在这里就把数据转成MissionItem格式
+    missionItemlistmain = []
+    i = 0
+    while (i<len(missionItems.lat)):
+        missionItemlistmain.append(MissionItem(double(missionItems.lat[i]),
+                                                double(missionItems.lon[0]),
+                                                float(missionItems.relative_altitude_m[i]),
+                                                float(missionItems.speed_m_s[i]),
+                                                bool(missionItems.is_fly_through[i]),
+                                                float('nan'),
+                                                float('nan'),
+                                                MissionItem.CameraAction.NONE,
+                                                float(missionItems.loiter_time_s[i]),
+                                                float('nan'),
+                                                float('nan'),
+                                                float('nan')
+                                                ))
+        print("missionItemlistmain[i]" , missionItemlistmain[i])
+        i += 1
+    # 赋值给misitl.missionItemlist
+    misitl.missionItemlist = missionItemlistmain
+    if await misitl.run():
+        return False
+    else:
+        return True
+
+
+# 4.20 arm大无人机
+from bigarm import big
+al = big()
+@app.get("/bigarmall")
+async def bigarm():
+    print("---------------arm bigbigbig:")
+    if await al.run():
+        # if os.system('python3 uav_all_test.py'):
+        return False
+    else:
+        return True
+
+
+# 4.20 实机任务测试json
+# 大无人机任务测试json
+from missionbigjson import missionbigjson
+missbig = missionbigjson()
+@app.post("/{uav_num}/missionbigjson")
+async def mission(uav_num: str,missionItems: MissionItems):
+    if uav_num =="1" :
+        uav_port = "192.168.1.81:8080"
+    elif uav_num == "2" :
+        uav_port = "192.168.1.191:8080"
+    # uav_port = "192.168.1.191:8080"
+    print(uav_port)
+    missbig.uavport = uav_port
+    print("missbig.uavport---------",missbig.uavport)
+    # 在这里就把数据转成MissionItem格式
+    missionItemlistmain = []
+    i = 0
+    while (i<len(missionItems.lat)):
+        missionItemlistmain.append(MissionItem(double(missionItems.lat[i]),
+                                                double(missionItems.lon[i]),
+                                                float(missionItems.relative_altitude_m[i]),
+                                                float(missionItems.speed_m_s[i]),
+                                                bool(missionItems.is_fly_through[i]),
+                                                float('nan'),
+                                                float('nan'),
+                                                MissionItem.CameraAction.NONE,
+                                                float(missionItems.loiter_time_s[i]),
+                                                float('nan'),
+                                                float('nan'),
+                                                float('nan'),
+                                                float('nan')
+                                                ))
+        print("missionItemlistmain[i]" , missionItemlistmain[i])
+        i += 1
+    # 赋值给missbig.missionItemlist
+    missbig.missionItemlist = missionItemlistmain
+    print("missbig.missionItemlist-------",missbig.missionItemlist)
+    # return True
+    if await missbig.run():
+        return False
+    else:
+        return True
+
+
+# 4.21 暂停任务
+from pausemission import pausemission
+psm = pausemission()
+@app.get("/{uav_num}/pausemission")
+async def psmission(uav_num: str):
+    if uav_num =="1" :
+        uav_port = "192.168.1.81:8080"
+    elif uav_num == "2" :
+        uav_port = "192.168.1.191:8080"
+    psm.uavport = uav_port
+    if await psm.run():
+        return False
+    else:
+        return True
+
+# 4.21 启动任务
+from startmission import startmission
+stm = startmission()
+@app.get("/{uav_num}/startmission")
+async def stmission(uav_num: str):
+    if uav_num =="1" :
+        uav_port = "192.168.1.81:8080"
+    elif uav_num == "2" :
+        uav_port = "192.168.1.191:8080"
+    stm.uavport = uav_port
+    if await stm.run():
+        return False
+    else:
+        return True
+
+# 4.21 终止任务并返航
+from terminationreturn import terminationreturn
+terreturn = terminationreturn()
+@app.get("/{uav_num}/terminationreturn")
+async def tereturn(uav_num: str):
+    if uav_num =="1" :
+        uav_port = "192.168.1.81:8080"
+    elif uav_num == "2" :
+        uav_port = "192.168.1.191:8080"
+    terreturn.uavport = uav_port
+    if await terreturn.run():
+        return False
+    else:
+        return True
 
 if __name__ == "__main__":
     import uvicorn
