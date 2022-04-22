@@ -5,12 +5,61 @@
 from operator import truediv
 import os
 
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket
+from fastapi.responses import HTMLResponse
 from numpy import double
 # import sys
 from pydantic import BaseModel
 
+
 app = FastAPI()
+
+# 写个主页面
+html = """
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chat</title>
+    </head>
+    <body>
+        <h1>UAVFastAPI主页面</h1>
+        <!--发送websocket-->
+        <form action="" onsubmit="sendMessage(event)">
+            <input type="text" id="messageText" autocomplete="off"/>
+            <button>Send</button>
+        </form>
+        <form action=" onsubmit="getsitllog(event)">
+            <button>点击获取sitl的日志</button>
+        
+        </form>
+        <!--展示websocket-->
+        <ul id='messages'>
+        </ul>
+
+        <script>
+            var ws = new WebSocket("ws://localhost:8000/ws");
+            ws.onmessage = function(event) {
+                var messages = document.getElementById('messages')
+                var message = document.createElement('li')
+                var content = document.createTextNode(event.data)
+                message.appendChild(content)
+                messages.appendChild(message)
+            };
+            function sendMessage(event) {
+                var input = document.getElementById("messageText")
+                ws.send(input.value)
+                input.value = ''
+                event.preventDefault()
+            }
+
+        </script>
+    </body>
+</html>
+"""
+@app.get("/")
+async def get():
+    return HTMLResponse(html)
+
 
 # class MissionItems(BaseModel):
 #     routeLine = []
@@ -463,6 +512,50 @@ async def tereturn(uav_num: str):
         return False
     else:
         return True
+
+
+# 仿真无人机日志websocket实现
+from sitllogsocket import sitllogsocket
+sitllogsk = sitllogsocket()
+# @app.websocket("/{uav_num}/sitllogsocket")
+@app.websocket("/ws")
+# async def logsocket(uav_num: str , websocketfront: WebSocket):
+async def wssocket(websocketfront: WebSocket):
+    # uav_port = str(int(uav_num[-1]) + 14540)
+    # sitllogsk.uavport = uav_port
+    sitllogsk.uavport = 14541
+    sitllogsk.websocket = websocketfront
+
+    # # 可以------------
+    # await websocketfront.accept()
+    # while True:
+    #     data = "12345"
+    #     await websocketfront.send_text(f"Message text was: 1234")
+    # # --------------
+
+    if await sitllogsk.run():
+        return True
+    else:
+        return False
+
+
+# 4.22 大无人机日志的websocket实现
+from biglogsocket import biglogsocket
+biglogsk = biglogsocket()
+@app.websocket("/{uav_num}/biglogsocket")
+async def biglogsok(uav_num: str,bigwebsocket : WebSocket):
+    if uav_num =="1" :
+        uav_port = "192.168.1.81:8080"
+    elif uav_num == "2" :
+        uav_port = "192.168.1.191:8080"
+    biglogsk.uavport = uav_port
+    biglogsk.websocket = bigwebsocket
+
+    await biglogsk.run()
+
+
+
+
 
 if __name__ == "__main__":
     import uvicorn
