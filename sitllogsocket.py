@@ -19,7 +19,7 @@ class sitllogsocket:
     async def run(self):
 
         drone = System()
-        await drone.connect(system_address="udp://:" + self.uavport)
+        await drone.connect(system_address="udp://" + self.uavport)
 
         print("Waiting for drone to connect...")
         async for state in drone.core.connection_state():
