@@ -1,9 +1,13 @@
 from dronekit import connect
 
+# 4.23 成功
+
+
 # Connect to the Vehicle (in this case a UDP endpoint)
 # worked!!!
 # because browser AccessPoint Clients IP is 10.42.0.62
 vehicle = connect('10.42.0.62:14550', wait_ready=True, baud=921600)
+# vehicle = connect('10.42.0.235:14550', wait_ready=True, baud=921600)
 
 # vehicle is an instance of the Vehicle class
 
