@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 
 import asyncio
-# from main import returntolaunch
 from mavsdk import System
 import sys
 
-class returntolaunch():
-    async def run():
+class sitlland():
+    uavport : str
+    async def run(self):
 
         drone = System()
-        await drone.connect(system_address="udp://:" + sys.argv[1])
+        await drone.connect(system_address="udp://:" + self.uavport)
 
         print("Waiting for drone to connect...")
         async for state in drone.core.connection_state():
@@ -17,9 +17,10 @@ class returntolaunch():
                 print(f"Drone discovered!")
                 break
 
-        print("-- Return To Launch")
-        await drone.action.return_to_launch()
+        print("-- Landing")
+        await drone.action.land()
 
+        await asyncio.sleep(5)
 
 
 # loop = asyncio.get_event_loop()

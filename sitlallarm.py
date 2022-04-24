@@ -3,7 +3,7 @@
 import asyncio
 from mavsdk import System
 
-class uav_all_test():
+class sitlallarm():
     async def run(self):
         drone = System()
         if (await drone.connect(system_address="udp://:14540")):

@@ -2,13 +2,16 @@
 
 import asyncio
 from mavsdk import System
-import sys
+# import sys
 
-class land():
-    async def run():
+class bigland():
+    uavport : str
+    async def run(self):
 
         drone = System()
-        await drone.connect(system_address="udp://:" + sys.argv[1])
+        # await drone.connect(system_address="udp://:" + self.uavport)
+        await drone.connect(system_address="tcp://" + self.uavport)
+
 
         print("Waiting for drone to connect...")
         async for state in drone.core.connection_state():
@@ -20,7 +23,3 @@ class land():
         await drone.action.land()
 
         await asyncio.sleep(5)
-
-
-# loop = asyncio.get_event_loop()
-# loop.run_until_complete(run())
