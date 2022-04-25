@@ -48,7 +48,7 @@ class biglogsocket:
 
             # 套接字发送data
             # await self.websocket.send_json()
-            await self.websocket.send_text(f"battery : {self.battery} , location : {self.location}")
+            await self.websocket.send_text(f"battery : {self.battery} ,/n location : {self.location}")
 
             # # 可以-----
             # data = "12345"

@@ -130,7 +130,7 @@ class DronekitMissionItems(BaseModel):
 # 仿真全部arm
 from sitlallarm import sitlallarm
 sitlarm = sitlallarm()
-@app.get("/sitlarmAll")
+@app.get("/sitl/armAll")
 async def sitlarmAll():
     print("---------------sitl arm all uav:")
     if await sitlarm.run():
@@ -168,7 +168,7 @@ async def bigarm(uav_num: str):
 # 仿真takeoff
 from sitltakeoff import sitltakeoff
 sitltkoff = sitltakeoff()
-@app.get("/{uav_num}/sitltakeoff")
+@app.get("/{uav_num}/sitl/takeoff")
 async def sitltkeoff(uav_num: str):
     # uav_port = str(int(uav_num[-1]) + 14540)
     sitltkoff.uavport = uav_num
@@ -395,7 +395,7 @@ async def manualcontrol(uav_num: str):
 # 3.15  80大无人机 死命令
 from bigmissiontest import bigmissiontest
 bigmissionT = bigmissiontest()
-@app.get("/missiontest")
+@app.get("/bigmissiontestdead")
 async def missiontest():
     print("---------------bigmissiontest:")
     # if os.system('python missiontest.py'):
@@ -406,7 +406,7 @@ async def missiontest():
 
 
 # 3.15 实机测试mission 把任务写进文件
-@app.post("/missiontest2")
+@app.post("/bigmissiontesttxt")
 async def mission(uav_num: str,missionItems: MissionItems):
     uav_port = str(int(uav_num[-1]) + 14540)
 
@@ -430,7 +430,7 @@ async def mission(uav_num: str,missionItems: MissionItems):
 from missionsitl import msitl
 misitl = msitl()
 from mavsdk.mission import MissionItem
-@app.post("/{uav_num}/sitlmission")
+@app.post("/{uav_num}/sitl/mission")
 async def mission(uav_num: str,missionItems: MissionItems):
     uav_port = str(int(uav_num[-1]) + 14540)
     misitl.uavport = uav_port
@@ -468,7 +468,7 @@ async def mission(uav_num: str,missionItems: MissionItems):
 # 大无人机任务测试json
 from missionbigjson import missionbigjson
 missbig = missionbigjson()
-@app.post("/{uav_num}/missionbigjson")
+@app.post("/{uav_num}/bigmission")
 async def mission(uav_num: str,missionItems: MissionItems):
     if uav_num =="1" :
         uav_port = "192.168.1.81:8080"
@@ -578,7 +578,7 @@ async def tereturn(uav_num: str):
 # 4.18 大无人机日志 单次获取 用return返回
 from Location_log import Location_log
 log = Location_log()
-@app.get("/{uav_num}/biglog")
+@app.get("/{uav_num}/biglogsingle")
 async def location(uav_num: str):
     if uav_num =="1" :
         uav_port = "192.168.1.81:8080"
@@ -597,7 +597,7 @@ async def location(uav_num: str):
 from sitllogsocket import sitllogsocket
 sitllogsk = sitllogsocket()
 # @app.websocket("/{uav_num}/sitllogsocket")
-@app.websocket("/ws")
+@app.websocket("/sitl/logws")
 # async def logsocket(uav_num: str , websocketfront: WebSocket):
 async def wssocket(websocketfront: WebSocket):
     # uav_port = str(int(uav_num[-1]) + 14540)
@@ -621,7 +621,7 @@ async def wssocket(websocketfront: WebSocket):
 # 4.22 大无人机日志的websocket实现-----------未
 from biglogsocket import biglogsocket
 biglogsk = biglogsocket()
-@app.websocket("/{uav_num}/biglogsocket")
+@app.websocket("/{uav_num}/biglog")
 async def biglogsok(uav_num: str,bigwebsocket : WebSocket):
     if uav_num =="1" :
         uav_port = "192.168.1.81:8080"
