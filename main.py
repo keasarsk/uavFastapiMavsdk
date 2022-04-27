@@ -96,7 +96,6 @@ async def get():
 # endregion
 
 # 大无人机任务参数
-# 按照师姐写
 class MissionItems(BaseModel):
     # 经纬度列表 double
     lat = []
@@ -125,7 +124,7 @@ class DronekitMissionItems(BaseModel):
     def getInfo(self):
         return self.lat , self.lon , self.alt
     
-
+# -----------------------------------------------------仿真操作
 
 # 仿真全部arm
 from sitlallarm import sitlallarm
@@ -138,6 +137,161 @@ async def sitlarmAll():
     else:
         return True
 
+
+# 仿真takeoff
+from sitltakeoff import sitltakeoff
+sitltkoff = sitltakeoff()
+@app.get("/{uav_num}/sitl/takeoff")
+async def sitltkeoff(uav_num: str):
+    # uav_port = str(int(uav_num[-1]) + 14540)
+    sitltkoff.uavport = uav_num
+    # if os.system('python takeoff.py ' + uav_port):
+    if await sitltkoff.run():
+        return False
+    else:
+        return True
+
+
+# 仿真land
+from sitlland import sitlland
+sitllad = sitlland()
+@app.get("/{uav_num}/sitl/land")
+async def sitland(uav_num: str):
+    uav_port = str(int(uav_num[-1]) + 14540)
+    sitllad.uavport = uav_port
+    # if os.system('python3 land.py ' + uav_port):
+    if await sitllad.run():
+        return False
+    else:
+        return True
+
+# 好像并没有什么用
+@app.get("/{uav_num}/sitl/keyboardControl")
+async def keyboardControl(uav_num: str):
+    uav_port = str(int(uav_num[-1]) + 14540)
+    if os.system('python3 keyboardControl.py ' + uav_port):
+        return False
+    else:
+        return True
+
+
+# 下载日志文件 这个现在下载在了本地
+@app.get("/{uav_num}/sitl/logfile")
+async def logfile(uav_num: str):
+    uav_port = str(int(uav_num[-1]) + 14540)
+    if os.system('python3 logfile.py ' + uav_port):
+        return False
+    else:
+        return True
+
+
+# 需要传入一个坐标 未完善
+from goto import goto
+gt = goto()
+@app.get("/{uav_num}/sitl/goto")
+async def gto(uav_num: str):
+    uav_port = str(int(uav_num[-1]) + 14540)
+    # if os.system('python3 goto.py ' + uav_port):
+    if await gt.run():
+        return False
+    else:
+        return True
+
+# 未完善 暂时意义不大
+@app.get("/{uav_num}/sitl/followme")
+async def followme(uav_num: str):
+    uav_port = str(int(uav_num[-1]) + 14540)
+    if os.system('python3 followme.py ' + uav_port):
+        return False
+    else:
+        return True
+
+
+# 这个等推流吧
+@app.get("/{uav_num}/sitl/camera")
+async def camera(uav_num: str):
+    uav_port = str(int(uav_num[-1]) + 14540)
+    if os.system('python3 camera.py ' + uav_port):
+        return False
+    else:
+        return True
+
+# 意义不大
+@app.get("/{uav_num}/sitl/manualcontrol")
+async def manualcontrol(uav_num: str):
+    uav_port = str(int(uav_num[-1]) + 14540)
+    if os.system('python3 manual_control.py ' + uav_port):
+        return False
+    else:
+        return True
+
+
+# 4.19
+# 仿真任务测试json
+from missionsitl import msitl
+misitl = msitl()
+from mavsdk.mission import MissionItem
+@app.post("/{uav_num}/sitl/missionjson")
+async def mission(uav_num: str,missionItems: MissionItems):
+    uav_port = str(int(uav_num[-1]) + 14540)
+    misitl.uavport = uav_port
+    # 获得传进来的json内容
+    print("missionItems.lat-------",missionItems.lat)
+    print("missionItems.lat[0]-------",missionItems.lat[0])
+    # 在这里就把数据转成MissionItem格式
+    missionItemlistmain = []
+    i = 0
+    while (i<len(missionItems.lat)):
+        missionItemlistmain.append(MissionItem(double(missionItems.lat[i]),
+                                                double(missionItems.lon[0]),
+                                                float(missionItems.relative_altitude_m[i]),
+                                                float(missionItems.speed_m_s[i]),
+                                                bool(missionItems.is_fly_through[i]),
+                                                float('nan'),
+                                                float('nan'),
+                                                MissionItem.CameraAction.NONE,
+                                                float(missionItems.loiter_time_s[i]),
+                                                float('nan'),
+                                                float('nan'),
+                                                float('nan')
+                                                ))
+        print("missionItemlistmain[i]" , missionItemlistmain[i])
+        i += 1
+    # 赋值给misitl.missionItemlist
+    misitl.missionItemlist = missionItemlistmain
+    if await misitl.run():
+        return False
+    else:
+        return True
+
+
+
+# 仿真无人机日志websocket实现-----------未
+from sitllogsocket import sitllogsocket
+sitllogsk = sitllogsocket()
+# @app.websocket("/{uav_num}/sitllogsocket")
+@app.websocket("/sitl/logws")
+# async def logsocket(uav_num: str , websocketfront: WebSocket):
+async def wssocket(websocketfront: WebSocket):
+    # uav_port = str(int(uav_num[-1]) + 14540)
+    # sitllogsk.uavport = uav_port
+    sitllogsk.uavport = 14541
+    sitllogsk.websocket = websocketfront
+
+    # # 可以------------
+    # await websocketfront.accept()
+    # while True:
+    #     data = "12345"
+    #     await websocketfront.send_text(f"Message text was: 1234")
+    # # --------------
+
+    if await sitllogsk.run():
+        return True
+    else:
+        return False
+
+
+# ---------------------------------------------------------实机
 
 # 4.23 小无人机也arm
 # 4.20 arm大无人机
@@ -164,22 +318,7 @@ async def bigarm(uav_num: str):
         return True
 
 
-
-# 仿真takeoff
-from sitltakeoff import sitltakeoff
-sitltkoff = sitltakeoff()
-@app.get("/{uav_num}/sitl/takeoff")
-async def sitltkeoff(uav_num: str):
-    # uav_port = str(int(uav_num[-1]) + 14540)
-    sitltkoff.uavport = uav_num
-    # if os.system('python takeoff.py ' + uav_port):
-    if await sitltkoff.run():
-        return False
-    else:
-        return True
-
-
-# 4.23 实机takeoff
+# 4.23 大小实机takeoff
 from bigtakeoff import bigtakeoff
 bigtkoff = bigtakeoff()
 @app.get("/{uav_num}/takeoff")
@@ -203,7 +342,7 @@ async def takeoff(uav_num: str):
         return True
 
 
-# 4.24 实机return to launch
+# 4.24 大小实机return to launch
 # 升高的一定高度 返回发射位置并着陆
 from big_return_to_launch import returntolaunch
 bigreturnlaunch = returntolaunch()
@@ -282,19 +421,6 @@ async def relaunch(uav_num: str):
 
 
 
-# 仿真land
-from sitlland import sitlland
-sitllad = sitlland()
-@app.get("/{uav_num}/sitl/land")
-async def sitland(uav_num: str):
-    uav_port = str(int(uav_num[-1]) + 14540)
-    sitllad.uavport = uav_port
-    # if os.system('python3 land.py ' + uav_port):
-    if await sitllad.run():
-        return False
-    else:
-        return True
-
 # 4.23 实机land
 # 没找到dronekit的land
 from bigland import bigland
@@ -317,81 +443,9 @@ async def land(uav_num: str):
         else:
             return True
 
-# 好像并没有什么用
-@app.get("/{uav_num}/keyboardControl")
-async def keyboardControl(uav_num: str):
-    uav_port = str(int(uav_num[-1]) + 14540)
-    if os.system('python3 keyboardControl.py ' + uav_port):
-        return False
-    else:
-        return True
 
 
-# 下载日志文件 这个现在下载在了本地
-@app.get("/{uav_num}/logfile")
-async def logfile(uav_num: str):
-    uav_port = str(int(uav_num[-1]) + 14540)
-    if os.system('python3 logfile.py ' + uav_port):
-        return False
-    else:
-        return True
-
-
-
-# 需要传入一个坐标 未完善
-from goto import goto
-gt = goto()
-@app.get("/{uav_num}/goto")
-async def gto(uav_num: str):
-    uav_port = str(int(uav_num[-1]) + 14540)
-    # if os.system('python3 goto.py ' + uav_port):
-    if await gt.run():
-        return False
-    else:
-        return True
-
-# 未完善 暂时意义不大
-@app.get("/{uav_num}/followme")
-async def followme(uav_num: str):
-    uav_port = str(int(uav_num[-1]) + 14540)
-    if os.system('python3 followme.py ' + uav_port):
-        return False
-    else:
-        return True
-
-
-# @app.get("/{uav_num}/location")
-# async def location(uav_num: str):
-    
-#     uav_port = str(int(uav_num[-1]) + 14540)
-#     if os.system('python3 location_now.py ' + uav_port):
-#         return False
-#     else:
-#         return True
-
-
-# 这个等推流吧
-@app.get("/{uav_num}/camera")
-async def camera(uav_num: str):
-    uav_port = str(int(uav_num[-1]) + 14540)
-    if os.system('python3 camera.py ' + uav_port):
-        return False
-    else:
-        return True
-
-# 意义不大
-@app.get("/{uav_num}/manualcontrol")
-async def manualcontrol(uav_num: str):
-    uav_port = str(int(uav_num[-1]) + 14540)
-    if os.system('python3 manual_control.py ' + uav_port):
-        return False
-    else:
-        return True
-
-
-
-
-# ---------------------------------------------------------------任务
+# ----------------------------------------任务
 # 3.15  80大无人机 死命令
 from bigmissiontest import bigmissiontest
 bigmissionT = bigmissiontest()
@@ -421,44 +475,6 @@ async def mission(uav_num: str,missionItems: MissionItems):
 
     print("---------------missiontest2222:")
     if os.system('python bigmissiontest.py '):
-        return False
-    else:
-        return True
-
-# 4.19
-# 仿真任务测试json
-from missionsitl import msitl
-misitl = msitl()
-from mavsdk.mission import MissionItem
-@app.post("/{uav_num}/sitl/mission")
-async def mission(uav_num: str,missionItems: MissionItems):
-    uav_port = str(int(uav_num[-1]) + 14540)
-    misitl.uavport = uav_port
-    # 获得传进来的json内容
-    print("missionItems.lat-------",missionItems.lat)
-    print("missionItems.lat[0]-------",missionItems.lat[0])
-    # 在这里就把数据转成MissionItem格式
-    missionItemlistmain = []
-    i = 0
-    while (i<len(missionItems.lat)):
-        missionItemlistmain.append(MissionItem(double(missionItems.lat[i]),
-                                                double(missionItems.lon[0]),
-                                                float(missionItems.relative_altitude_m[i]),
-                                                float(missionItems.speed_m_s[i]),
-                                                bool(missionItems.is_fly_through[i]),
-                                                float('nan'),
-                                                float('nan'),
-                                                MissionItem.CameraAction.NONE,
-                                                float(missionItems.loiter_time_s[i]),
-                                                float('nan'),
-                                                float('nan'),
-                                                float('nan')
-                                                ))
-        print("missionItemlistmain[i]" , missionItemlistmain[i])
-        i += 1
-    # 赋值给misitl.missionItemlist
-    misitl.missionItemlist = missionItemlistmain
-    if await misitl.run():
         return False
     else:
         return True
@@ -526,10 +542,10 @@ async def littlemission(littlemissionitems : DronekitMissionItems):
         return "uav0 is ready!!!"
 
 
-# 4.21 暂停任务-----------未
+# 4.21 大暂停任务-----------未
 from pausemission import pausemission
 psm = pausemission()
-@app.get("/{uav_num}/pausemission")
+@app.get("/{uav_num}/bigpausemission")
 async def psmission(uav_num: str):
     if uav_num =="1" :
         uav_port = "192.168.1.81:8080"
@@ -541,10 +557,10 @@ async def psmission(uav_num: str):
     else:
         return True
 
-# 4.21 启动任务-----------未
+# 4.21 大启动任务-----------未
 from startmission import startmission
 stm = startmission()
-@app.get("/{uav_num}/startmission")
+@app.get("/{uav_num}/bigstartmission")
 async def stmission(uav_num: str):
     if uav_num =="1" :
         uav_port = "192.168.1.81:8080"
@@ -556,10 +572,10 @@ async def stmission(uav_num: str):
     else:
         return True
 
-# 4.21 终止任务并返航-----------未
+# 4.21 大终止任务并返航-----------未
 from terminationreturn import terminationreturn
 terreturn = terminationreturn()
-@app.get("/{uav_num}/terminationreturn")
+@app.get("/{uav_num}/bigterminationreturn")
 async def tereturn(uav_num: str):
     if uav_num =="1" :
         uav_port = "192.168.1.81:8080"
@@ -573,7 +589,7 @@ async def tereturn(uav_num: str):
 
 
 
-# ----------------------------------------------------------日志
+# --------------------------------------------------日志
 # 4.18
 # 4.18 大无人机日志 单次获取 用return返回
 from Location_log import Location_log
@@ -592,36 +608,18 @@ async def location(uav_num: str):
     else:
         return log.battery , log.location
 
-
-# 仿真无人机日志websocket实现-----------未
-from sitllogsocket import sitllogsocket
-sitllogsk = sitllogsocket()
-# @app.websocket("/{uav_num}/sitllogsocket")
-@app.websocket("/sitl/logws")
-# async def logsocket(uav_num: str , websocketfront: WebSocket):
-async def wssocket(websocketfront: WebSocket):
-    # uav_port = str(int(uav_num[-1]) + 14540)
-    # sitllogsk.uavport = uav_port
-    sitllogsk.uavport = 14541
-    sitllogsk.websocket = websocketfront
-
-    # # 可以------------
-    # await websocketfront.accept()
-    # while True:
-    #     data = "12345"
-    #     await websocketfront.send_text(f"Message text was: 1234")
-    # # --------------
-
-    if await sitllogsk.run():
+# 4.24 小无人机日志 单次获取实现 由于python2 不能使用fastapi的socket
+@app.get("/littlelogsingle")
+async def littlelog():
+    if os.system('python2 little_log.py'):
         return True
-    else:
+    else :
         return False
-
 
 # 4.22 大无人机日志的websocket实现-----------未
 from biglogsocket import biglogsocket
 biglogsk = biglogsocket()
-@app.websocket("/{uav_num}/biglog")
+@app.websocket("/{uav_num}/biglogws")
 async def biglogsok(uav_num: str,bigwebsocket : WebSocket):
     if uav_num =="1" :
         uav_port = "192.168.1.81:8080"
@@ -632,13 +630,7 @@ async def biglogsok(uav_num: str,bigwebsocket : WebSocket):
 
     await biglogsk.run()
 
-# 4.24 小无人机日志 单次获取实现 由于python2 不能使用fastapi的socket
-@app.get("/littlelog")
-async def littlelog():
-    if os.system('python2 little_log.py'):
-        return True
-    else :
-        return False
+
 
 if __name__ == "__main__":
     import uvicorn
