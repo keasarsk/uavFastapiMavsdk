@@ -38,10 +38,13 @@ class biglogsocket:
         while True:
 
             # --------------------电池电压和电量百分数
+            # Battery: [id: 0, voltage_v: 15.100000381469727, remaining_percent: 0.5099999904632568]
             async for terrain_info2 in drone.telemetry.battery():
                 self.battery = terrain_info2
                 break
             # --------------------position()当前位置（更新当前位置）
+            # Position: [latitude_deg: 47.3977693, longitude_deg: 8.545593499999999, absolute_altitude_m: 488.0790100097656, relative_altitude_m: 0.009000000543892384]
+        
             async for terrain_info5 in drone.telemetry.position():
                 self.location = terrain_info5
                 break
