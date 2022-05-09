@@ -630,7 +630,20 @@ async def biglogsok(uav_num: str,bigwebsocket : WebSocket):
 
     await biglogsk.run()
 
+# 5.8 websockettest
+from websockettest import websocket
+webskt = websocket()
+@app.websocket("/{uav_num}/wstest")
+async def biglogsok(uav_num: str,websockettest : WebSocket):
+    if uav_num =="1" :
+        uav_port = "192.168.1.81:8080"
+    elif uav_num == "2" :
+        uav_port = "192.168.1.191:8080"
+    # biglogsk.uavport = uav_port
+    print('websocketest---------', uav_port)
+    webskt.websocket = websockettest
 
+    await webskt.run()
 
 if __name__ == "__main__":
     import uvicorn
