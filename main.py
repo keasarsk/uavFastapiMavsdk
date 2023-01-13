@@ -645,6 +645,56 @@ async def biglogsok(uav_num: str,websockettest : WebSocket):
 
     await webskt.run()
 
+# 23.1.13 图像识别 api---------------------------------------------
+# 启动识别
+@app.websocket("/{uav_num}/startRecognize")
+async def biglogsok(uav_num: str):
+    if uav_num =="1" :
+        uav_port = "192.168.1.81:8080"
+    elif uav_num == "2" :
+        uav_port = "192.168.1.191:8080"
+    print('start recognize ---------')
+# 关闭识别
+@app.websocket("/{uav_num}/shutdownRecognize")
+async def biglogsok(uav_num: str):
+    if uav_num =="1" :
+        uav_port = "192.168.1.81:8080"
+    elif uav_num == "2" :
+        uav_port = "192.168.1.191:8080"
+    print('shutdown recognize ---------')
+# 跟踪编号i
+@app.websocket("/{uav_num}/followNum")
+async def biglogsok(uav_num: str, i: int):
+    if uav_num =="1" :
+        uav_port = "192.168.1.81:8080"
+    elif uav_num == "2" :
+        uav_port = "192.168.1.191:8080"
+    print('following ---------')
+# 跟踪编号i(近)
+@app.websocket("/{uav_num}/followNumClose")
+async def biglogsok(uav_num: str, i: int):
+    if uav_num =="1" :
+        uav_port = "192.168.1.81:8080"
+    elif uav_num == "2" :
+        uav_port = "192.168.1.191:8080"
+    print('follow NumC lose ---------')
+# 原地左旋45
+@app.websocket("/{uav_num}/turnLeft")
+async def biglogsok(uav_num: str):
+    if uav_num =="1" :
+        uav_port = "192.168.1.81:8080"
+    elif uav_num == "2" :
+        uav_port = "192.168.1.191:8080"
+    print('turn left 45` ---------')
+# 原地右旋45
+@app.websocket("/{uav_num}/turnRight")
+async def biglogsok(uav_num: str):
+    if uav_num =="1" :
+        uav_port = "192.168.1.81:8080"
+    elif uav_num == "2" :
+        uav_port = "192.168.1.191:8080"
+    print('turn right 45` ---------')
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
