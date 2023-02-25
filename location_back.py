@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+
+# 终端打印 log
+
 import asyncio
 from mavsdk import System
 from mavsdk import telemetry

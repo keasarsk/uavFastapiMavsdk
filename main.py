@@ -175,6 +175,7 @@ async def keyboardControl(uav_num: str):
         return True
 
 
+# ----------------------------------------------------------大日志
 # 下载日志文件 这个现在下载在了本地
 @app.get("/{uav_num}/sitl/logfile")
 async def logfile(uav_num: str):
@@ -183,6 +184,58 @@ async def logfile(uav_num: str):
         return False
     else:
         return True
+
+# 日志下载到本地 每隔几秒
+import time
+@app.get("/{uav_num}/logintolocal")
+async def logfile(uav_num: str):
+    # return True
+    uav_port = str(int(uav_num[-1]) + 14540)
+    times = 6
+    while(times > 0):
+        time.sleep(2)
+        times-=1
+        # os.system('python3 logfile.py ' + uav_port)
+        os.system('python3 DataBase/test.py')
+    return True
+    
+# 链接数据库传日志
+from fastapi import Depends
+import DataBase.crud, DataBase.schemad
+from DataBase.database import SessionLocal, engine, Base
+from sqlalchemy.orm import Session
+Base.metadata.create_all(bind=engine) #数据库初始化，如果没有库或者表，会自动创建
+# Dependency
+def get_db():
+    """
+    每一个请求处理完毕后会关闭当前连接，不同的请求使用不同的连接
+    :return:
+    """
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# 通过gettest 
+@app.get("/gettest")
+async def test(db: Session = Depends(get_db)):
+    gettest = DataBase.crud
+    if gettest.get_test(db):
+        return False
+    else:
+        return True
+
+# 通过获取 drone_flylog第一个
+@app.get("/getdroneflylogfirst")
+async def test(db: Session = Depends(get_db)):
+    gettest = DataBase.crud
+    if gettest.get_drone_flylog(db):
+        return False
+    else:
+        return True
+
+
 
 
 # 需要传入一个坐标 未完善
@@ -698,3 +751,22 @@ async def biglogsok(uav_num: str):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
+
+
+# 23.2.22 大 日志存储到数据库
+# from Location_log import Location_log
+# log = Location_log()
+@app.get("/{uav_num}/biglogintodb")
+async def location(uav_num: str):
+    if uav_num =="1" :
+        uav_port = "192.168.1.81:8080"
+    elif uav_num == "2" :
+        uav_port = "192.168.1.191:8080"
+    
+    # log.uavport = uav_port
+    # print("log.uavport-----")
+    print(log.uavport)
+    if await log.run():
+        return log.battery , log.location
+    else:
+        return log.battery , log.location
