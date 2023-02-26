@@ -1,40 +1,45 @@
 from mavsdk import System
 import time
-import datetime
+from datetime import datetime
+import asyncio
 
-def insert_log_localmysql(times: int, gap: int):
-
+async def run():
+	
     print("insert into local mysql")
     drone = System()
-    drone.connect(system_address="tcp://192.168.1.191:8080")
+    # drone.connect(system_address="tcp://192.168.1.191:8080")
+    await drone.connect(system_address="udp://:14540")
 
     print("Waiting for drone to connect...")
-    for state in drone.core.connection_state():
+    async for state in drone.core.connection_state():
         if state.is_connected:
             print(f"Drone discovered!")
             break
 
     print("Waiting for drone to have a global position estimate...")
-    for health in drone.telemetry.health():
+    async for health in drone.telemetry.health():
         if health.is_global_position_ok:
             print("Global position estimate ok")
             break
-    
+    times = 1
+    gap = 1
     while(times > 0):
         times -= 1
         time.sleep(gap)
-        for i in drone.telemetry.position():
+        async for i in drone.telemetry.position():
             la = i.latitude_deg
             ln = i.longitude_deg
+            break
+        async for i in drone.telemetry.battery():
             bat = i.remaining_percent
             break
-        for flight_mode in drone.telemetry.flight_mode():
+        async for flight_mode in drone.telemetry.flight_mode():
             flm = flight_mode
             break
-        for is_armed in drone.telemetry.armed():
+        async for is_armed in drone.telemetry.armed():
             ia = is_armed
             break
-        for is_in_air in drone.telemetry.in_air():
+        async for is_in_air in drone.telemetry.in_air():
             iia = is_in_air
             break
 
@@ -45,6 +50,6 @@ def insert_log_localmysql(times: int, gap: int):
         
 
 if __name__ == "__main__":
-    insert_log_localmysql(5, 1)
-#     loop = asyncio.get_event_loop()
-#     loop.run_until_complete(run())
+    #insert_log_localmysql(5, 1)
+     loop = asyncio.get_event_loop()
+     loop.run_until_complete(run())
