@@ -226,14 +226,7 @@ async def test(db: Session = Depends(get_db)):
     else:
         return True
 
-# 通过获取 drone_flylog第一个
-@app.get("/getdroneflylogfirst")
-async def test(db: Session = Depends(get_db)):
-    gettest = DataBase.crud
-    if gettest.get_drone_flylog(db):
-        return False
-    else:
-        return True
+
 
 
 
@@ -347,6 +340,8 @@ async def wssocket(websocketfront: WebSocket):
 # ---------------------------------------------------------实机
 
 # 4.23 小无人机也arm
+
+
 # 4.20 arm大无人机
 from bigarm import big
 armbig = big()

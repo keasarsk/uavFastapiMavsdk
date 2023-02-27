@@ -4,25 +4,7 @@ from datetime import datetime
 import asyncio
 
 
-from fastapi import Depends
-import DataBase.crud, DataBase.schemad
-from DataBase.database import SessionLocal, engine, Base
-from sqlalchemy.orm import Session
-Base.metadata.create_all(bind=engine) #数据库初始化，如果没有库或者表，会自动创建
-# Dependency
-def get_db():
-    """
-    每一个请求处理完毕后会关闭当前连接，不同的请求使用不同的连接
-    :return:
-    """
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-    
-
-async def run(session: Session = Depends(get_db)):
+async def run():
     
     print("insert into local mysql")
     drone = System()
@@ -40,11 +22,11 @@ async def run(session: Session = Depends(get_db)):
         if health.is_global_position_ok:
             print("Global position estimate ok")
             break
-    times = 10000
+    times = 500
     gap = 1
     while(times > 0):
         times -= 1
-        time.sleep(0.5)
+        # time.sleep(0.1)
         async for i in drone.telemetry.position():
             la = i.latitude_deg
             ln = i.longitude_deg
@@ -63,9 +45,15 @@ async def run(session: Session = Depends(get_db)):
             break
 
         print(iia, la, ln, bat, flm, ia, datetime.now())
+        arr = [iia, la, ln, bat, flm, ia]
+        arr.append(datetime.now())
+        str1 = str(arr)
+        with open("log2.txt","a") as f:
+            f.writelines(str1+'\n')
+        # log = drone_flylog(drone_number="1", in_air=iia, lat = la, lng = ln, battery = bat, flight_mode = flm, is_armed = ia, datetime=datetime.now())
         
-        log = drone_flylog(drone_number="1", in_air=iia, lat = la, lng = ln, battery = bat, flight_mode = flm, is_armed = ia, datetime=datetime.now())
-        
+        arr = []
+        str1 = ""
         # session.add(log)
         # session.commit()
         
