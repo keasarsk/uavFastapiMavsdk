@@ -217,21 +217,11 @@ def get_db():
     finally:
         db.close()
 
-# 通过gettest 
-@app.get("/gettest")
-async def test(db: Session = Depends(get_db)):
-    gettest = DataBase.crud
-    if gettest.get_test(db):
-        return False
-    else:
-        return True
 
 
 
 
-
-
-# 需要传入一个坐标 未完善
+# 需要传入一个坐标 --*******************************未完善
 from goto import goto
 gt = goto()
 @app.get("/{uav_num}/sitl/goto")
@@ -693,7 +683,7 @@ async def biglogsok(uav_num: str,websockettest : WebSocket):
 
     await webskt.run()
 
-# 23.1.13 图像识别 api---------------------------------------------
+# 23.1.13 图像识别 api---------------------------------------------未 空有 api 没执行文件
 # 启动识别
 @app.websocket("/{uav_num}/startRecognize")
 async def biglogsok(uav_num: str):
@@ -743,25 +733,9 @@ async def biglogsok(uav_num: str):
         uav_port = "192.168.1.191:8080"
     print('turn right 45` ---------')
 
+
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
-
-
-# 23.2.22 大 日志存储到数据库
-# from Location_log import Location_log
-# log = Location_log()
-@app.get("/{uav_num}/biglogintodb")
-async def location(uav_num: str):
-    if uav_num =="1" :
-        uav_port = "192.168.1.81:8080"
-    elif uav_num == "2" :
-        uav_port = "192.168.1.191:8080"
-    
-    # log.uavport = uav_port
-    # print("log.uavport-----")
-    print(log.uavport)
-    if await log.run():
-        return log.battery , log.location
-    else:
-        return log.battery , log.location
