@@ -7,7 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.automap import automap_base
 
-SQLALCHEMY_DATABASE_URL = "mysql+pymysql://root:123456@127.0.0.1:3378/uavcloud?charset=utf8"
+SQLALCHEMY_DATABASE_URL = "mysql+pymysql://root:123456@210.30.97.238:3378/uav_cloud?charset=utf8"
 # SQLALCHEMY_DATABASE_URL = f'mysql+mysqlconnector://{USER}:{PWD}@localhost:3306/{DB_NAME}?charset=utf8&auth_plugin=mysql_native_password'
 
 

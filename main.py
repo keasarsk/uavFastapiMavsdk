@@ -201,7 +201,7 @@ async def logfile(uav_num: str):
     
 # 链接数据库传日志
 from fastapi import Depends
-import DataBase.crud, DataBase.schemad
+
 from DataBase.database import SessionLocal, engine, Base
 from sqlalchemy.orm import Session
 Base.metadata.create_all(bind=engine) #数据库初始化，如果没有库或者表，会自动创建
@@ -218,7 +218,24 @@ def get_db():
         db.close()
 
 
+# 为 flylogtest表添加一个记录 ,测试链接数据库
+from DataBase.database import flylogtest
+@app.get("/logtest")
+async def logtest(db: Session = Depends(get_db)):
+    fl = flylogtest(order_id = 7)
+    db.add(fl)
+    db.commit()
+    print("logtest")
+    return False
 
+# 将 log.txt 文件中记录添加到 drone_flylog 表中
+from DataBase.locallogtxtintodb import locallogtxtintodb
+lltid = locallogtxtintodb()
+@app.get("/logtest2")
+async def logtest2(db: Session = Depends(get_db)):
+    lltid.get_test(db)
+    print("logtest2")
+    return False
 
 
 # 需要传入一个坐标 --*******************************未完善
